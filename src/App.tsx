@@ -55,7 +55,18 @@ const {data, isLoading, error} = useQuery<CartItemType[]>(
     })
   };
 
-  const handleRemoveFromCart = () => null;
+  const handleRemoveFromCart = (id: number) => {
+    setCartItems(prev => (
+      prev.reduce((acc, item) => {
+          if(item.id === id){
+            if(item.quantity === 1) return acc;
+            return [...acc, {...item, quantity: item.quantity - 1}];
+          } else {
+            return [...acc, item];
+          }
+      }, [] as CartItemType[])
+    ))
+  } ;
 
 if(isLoading) return <LinearProgress />;
 if(error) return <div>Ooops, something went wrong</div>;
