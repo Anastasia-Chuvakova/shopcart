@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "react-query";
 //components
 import Item from "./item/item";
+import Cart from "./cart/cart";
 import Drawer from "@material-ui/core/Drawer";
 import  LinearProgress from "@material-ui/core/LinearProgress";
 import Grid from "@material-ui/core/Grid";
@@ -38,7 +39,21 @@ const {data, isLoading, error} = useQuery<CartItemType[]>(
   const getTotalItems = (items: CartItemType[]) => 
   items.reduce((acc:number, item)=> acc + item.quantity, 0);//reduce the items to a single number, initial value is 0
 
-  const handleAddToCart = (clickedItem: CartItemType) => null;
+  const handleAddToCart = (clickedItem: CartItemType) => {
+    setCartItems(prev => {
+      //is item already in the cart? if so, increase quantity
+      const isItemInCart = prev.find(item => item.id === clickedItem.id);
+      if(isItemInCart){
+        return prev.map(item => (
+          item.id === clickedItem.id ?{
+            ...item, quantity: item.quantity + 1
+          } : item
+        ))
+      }
+      //otherwise first time adding item to cart
+      return [ ...prev, {...clickedItem, quantity: 1}];
+    })
+  };
 
   const handleRemoveFromCart = () => null;
 
@@ -48,7 +63,10 @@ if(error) return <div>Ooops, something went wrong</div>;
   return (
     <Wrapper>
       <Drawer anchor="right" open={cartOpen} onClose={() => setCartOpen(false)}>
-        Cart component will be here
+        <Cart 
+         cartItems={cartItems}
+         addToCart={handleAddToCart} 
+         removeFromCart={handleRemoveFromCart}/>
       </Drawer>
       <StyledButton onClick={()=> setCartOpen(true)}>
         <Badge badgeContent={getTotalItems(cartItems)} color='error'>
